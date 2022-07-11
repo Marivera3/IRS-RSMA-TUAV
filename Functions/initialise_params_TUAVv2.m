@@ -173,7 +173,6 @@ common_rates = min(rate_c)/K*ones(size(rate_c));
 UEselection = "max";
 [s, iter, loop] = PS_initialCondition(s, h_T_U_PL, h_R_U_PL, G, ...
                             K, N_T, Pt, tau, varianceNoise, UEselection);
-iter
 Theta = diag(s);
 h_ov_k = (h_T_U_PL' + h_R_U_PL' * Theta * G)';
 p_c_IC = AMBF_common_precoder(h_ov_k, Pt, tau);

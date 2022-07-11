@@ -1,4 +1,4 @@
-function [s, iter, loop] = PS_initialCondition(s, h_T_U_PL, h_R_U_PL, G, ...
+function [s, iter, loop, rate_kp_vec, rate_c_vec] = PS_initialCondition(s, h_T_U_PL, h_R_U_PL, G, ...
                             K, N_T, Pt, tau, varianceNoise, UEselection)
 
 % PS_initialCondition(s, h_T_U_PL, h_R_U_PL, G, K, N_T, Pt, tau, varianceNoise)
@@ -68,6 +68,9 @@ cpt_old = 1e4;
 maxiter = 1000;
 iter = 0;
 
+rate_kp_vec = zeros(maxiter, 2);
+rate_c_vec = zeros(maxiter, 2);
+
 while loop
     iter = iter + 1;
     H_tilde_k = h_R_U_PL(:, UEk);
@@ -84,8 +87,9 @@ while loop
     cpt_old = cpt;
     Theta = diag(s);
     h_ov_k = (h_T_U_PL' + h_R_U_PL' * Theta * G)';
-    [~, rate_kp] = compute_rates(h_ov_k, K, varianceNoise, p_c_IC, p_k_IC);
-    [~, UEk] = min(rate_kp);
+    [rate_c, rate_kp] = compute_rates(h_ov_k, K, varianceNoise, p_c_IC, p_k_IC);
+    rate_kp_vec(iter, :) =  rate_kp;
+    rate_c_vec(iter, :) =  rate_c;
 end
 
 end
