@@ -29,10 +29,6 @@ fprintf(fileID, '\n');
 Theta = diag(s);
 h_ov_k = (h_T_U_PL' + h_R_U_PL' * Theta * G)';
 % tau = trace(p_k_IC*p_k_IC')/Pt;
-if iter == 1
-    p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
-    p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
-end
 
 try
     [RSMAoptStructureWMMSE, RSMAloopWMMSE, RSMAiterationsWMMSE, timeElapsedWMMSE] = ...

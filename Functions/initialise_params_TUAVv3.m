@@ -1,5 +1,5 @@
 %%
-% seed_value = 1;
+seed_value = 1; K = 2; N_R = 4096; pp = 1;
 rng(seed_value);
 cpt = get(groot,'defaultLineLineWidth');
 if cpt < 1
@@ -154,8 +154,8 @@ h_ov_k = (h_T_U_PL' + h_R_U_PL' * Theta * G)';
 
 %% Precoder
 
-p_c_IC = AMBF_common_precoder(h_ov_k, Pt, tau);
-% p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
+% p_c_IC = AMBF_common_precoder(h_ov_k, Pt, tau);
+p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
 p_k_IC = RZF_private_precoder_matrix(h_ov_k, Pt, K, tau, N_T);
 % p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
 
@@ -166,38 +166,21 @@ assert(round(trace(P*P')) == Pt, 'power out of bounds')
 
 %%
 
-[rate_c, rate_kp] = compute_rates(h_ov_k, K, varianceNoise, p_c_IC, p_k_IC);
+[rate_c, rate_kp] = compute_rates(h_ov_k, K, varianceNoise, p_c_IC, p_k_IC)
 common_rates = min(rate_c)/K*ones(size(rate_c));
-% [~, UEk] = max(rate_kp);
-% loop = 1;
-% cpt_old = 1e4;
-% maxiter = 1000;
-% iter = 0;
-% while loop
-%     iter = iter + 1;
-%     H_tilde_k = h_R_U_PL(:, UEk);
-%     U1 =  diag(H_tilde_k') * G; 
-%     phi = -angle(U1*(h_T_U_PL(:, UEk) + U1'*s));
-%     s = exp(1i*phi);
-%     cpt = sum(abs(h_T_U_PL(:, UEk) + U1'*s).^2);
-%     if abs(cpt-cpt_old) < 1e-4
-%         loop = 0;
-%     end
-%     if iter > maxiter
-%         break;
-%     end
-%     cpt_old = cpt;
-%     Theta = diag(s);
-%     h_ov_k = (h_T_U_PL' + h_R_U_PL' * Theta * G)';
-%     [~, rate_kp] = compute_rates(h_ov_k, K, varianceNoise, p_c_IC, p_k_IC);
-%     [~, UEk] = min(rate_kp);
-% end
-% Theta = diag(s);
-% h_ov_k = (h_T_U_PL' + h_R_U_PL' * Theta * G)';
+Rov = sum(rate_kp + common_rates)
+
+%%
+UEselection = "min";
+[s, iter, loop] = PS_initialCondition(s, h_T_U_PL, h_R_U_PL, G, ...
+                            K, N_T, Pt, tau, varianceNoise, UEselection);
+
+Theta = diag(s);
+h_ov_k = (h_T_U_PL' + h_R_U_PL' * Theta * G)';
 % p_c_IC = AMBF_common_precoder(h_ov_k, Pt, tau);
-% % p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
-% p_k_IC = RZF_private_precoder_matrix(h_ov_k, Pt, K, tau, N_T);
-% % p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
-% [rate_c, rate_kp] = compute_rates(h_ov_k, K, varianceNoise, p_c_IC, p_k_IC);
-% common_rates = min(rate_c)/K*ones(size(rate_c));
-% Rov = sum(rate_kp + common_rates);
+p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
+p_k_IC = RZF_private_precoder_matrix(h_ov_k, Pt, K, tau, N_T);
+% p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
+[rate_c, rate_kp] = compute_rates(h_ov_k, K, varianceNoise, p_c_IC, p_k_IC)
+common_rates = min(rate_c)/K*ones(size(rate_c));
+Rov = sum(rate_kp + common_rates)

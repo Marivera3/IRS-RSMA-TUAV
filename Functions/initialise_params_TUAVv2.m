@@ -154,10 +154,10 @@ h_ov_k = (h_T_U_PL' + h_R_U_PL' * Theta * G)';
 
 %% Precoder
 
-% p_c = AMBF_common_precoder(h_ov_k, Pt, tau);
-p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
-% p_k = RZF_private_precoder_matrix(h_ov_k, Pt, K, tau, N_T);
-p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
+p_c_IC = AMBF_common_precoder(h_ov_k, Pt, tau);
+% p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
+p_k_IC = RZF_private_precoder_matrix(h_ov_k, Pt, K, tau, N_T);
+% p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
 
 P = [p_c_IC, p_k_IC];
 assert(round(trace(P*P')) == Pt, 'power out of bounds')
@@ -168,3 +168,18 @@ assert(round(trace(P*P')) == Pt, 'power out of bounds')
 
 [rate_c, rate_kp] = compute_rates(h_ov_k, K, varianceNoise, p_c_IC, p_k_IC);
 common_rates = min(rate_c)/K*ones(size(rate_c));
+% Rov = sum(rate_kp + common_rates)
+
+UEselection = "max";
+[s, iter, loop] = PS_initialCondition(s, h_T_U_PL, h_R_U_PL, G, ...
+                            K, N_T, Pt, tau, varianceNoise, UEselection);
+iter
+Theta = diag(s);
+h_ov_k = (h_T_U_PL' + h_R_U_PL' * Theta * G)';
+p_c_IC = AMBF_common_precoder(h_ov_k, Pt, tau);
+% p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
+p_k_IC = RZF_private_precoder_matrix(h_ov_k, Pt, K, tau, N_T);
+% p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
+[rate_c, rate_kp] = compute_rates(h_ov_k, K, varianceNoise, p_c_IC, p_k_IC);
+common_rates = min(rate_c)/K*ones(size(rate_c));
+Rov = sum(rate_kp + common_rates);

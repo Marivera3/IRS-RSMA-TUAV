@@ -1,4 +1,5 @@
-function [s, iter, loop] = PS_initialCondition(s, h_T_U_PL, h_R_U_PL, G, K, N_T, Pt, tau, varianceNoise, UEselection)
+function [s, iter, loop] = PS_initialCondition(s, h_T_U_PL, h_R_U_PL, G, ...
+                            K, N_T, Pt, tau, varianceNoise, UEselection)
 
 % PS_initialCondition(s, h_T_U_PL, h_R_U_PL, G, K, N_T, Pt, tau, varianceNoise)
 %
